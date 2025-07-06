@@ -1,0 +1,33 @@
+[project]
+name = "be-splitter"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aerich>=0.8.0",
+    "aio-pika>=9.5.5",
+    "asyncpg>=0.30.0",
+    "fastapi[standard]>=0.115.12",
+    "faststream>=0.5.42",
+    "ffmpeg-python>=0.2.0",
+    "gunicorn>=23.0.0",
+    "minio-async>=1.0.1",
+    "miniopy-async>=1.23.1",
+    "pottery>=3.0.1",
+    "pydantic>=2.11.5",
+    "pydantic-settings>=2.9.1",
+    "python-json-logger>=3.3.0",
+    "redis>=6.2.0",
+    "tomli-w>=1.2.0",
+    "tortoise-orm==0.20.0",
+    "ujson>=5.10.0",
+    "unidecode>=1.4.0",
+    "uvicorn[standard]>=0.34.2",
+    "uvloop>=0.21.0",
+]
+
+[tool.aerich]
+tortoise_orm = "core.database.db_postgresql.TORTOISE_ORM"
+location = "src/app/migrations"
+src_folder = "./."

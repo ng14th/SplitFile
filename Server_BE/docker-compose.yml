@@ -1,0 +1,39 @@
+services:
+  # BE spliter
+  be_spliter_container:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    
+    # named image
+    image: nguyennt63/be_spliter:latest
+    # named container
+    container_name: be_spliter_container
+    # ports of container
+    ports:
+      - "3000:3000"
+    # select env
+    # env_file:
+    # 
+
+    # command start container
+    working_dir: /app/src
+    entrypoint: ["make"]
+    command: ["run-server"]
+
+    # healthcheck
+    # healthcheck:
+    #   test: ["CMD", "curl", "--fail", "http://localhost:5000/health/"]
+    #   interval: 15s
+    #   timeout: 3s
+    #   retries: 5
+
+    # restart
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+
+volumes:
+  be_spliter_data:

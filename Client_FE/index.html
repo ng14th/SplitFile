@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stream HLS (.m3u8)</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    video {
+      width: 640px;
+      height: 360px;
+      background: black;
+    }
+  </style>
+</head>
+<body>
+  <h1>HLS Video Streaming (.m3u8)</h1>
+  <video id="video" controls autoplay></video>
+
+  <script>
+    const API_URL = 'http://localhost:4000/api/storage/6';
+
+    async function fetchAndPlayHLS() {
+      try {
+        const res = await fetch(API_URL);
+        const json = await res.json();
+
+        if (!json.success || !Array.isArray(json.data)) {
+          console.error("❌ Invalid API response");
+          return;
+        }
+
+        const m3u8File = json.data.find(item => item.name.endsWith(".m3u8"));
+        if (!m3u8File) {
+          console.error("❌ No .m3u8 file found in API response");
+          return;
+        }
+
+        const video = document.getElementById('video');
+        const m3u8Url = m3u8File.url;
+
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(m3u8Url);
+          hls.attachMedia(video);
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          video.src = m3u8Url;
+        } else {
+          console.error("❌ HLS is not supported in this browser");
+        }
+
+      } catch (err) {
+        console.error("❌ Error fetching video:", err);
+      }
+    }
+
+    fetchAndPlayHLS();
+  </script>
+</body>
+</html>

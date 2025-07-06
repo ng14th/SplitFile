@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Auto Reloading HLS Streaming</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    video {
+      width: 640px;
+      height: 360px;
+      background: black;
+    }
+  </style>
+</head>
+<body>
+  <h1>HLS Video Player (Auto Refresh)</h1>
+  <video id="video" controls autoplay></video>
+
+  <script>
+    // Lấy fileId từ query param URL (?fileId=24)
+    function getFileIdFromURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get("fileId");
+    }
+
+    const video = document.getElementById("video");
+    const fileId = getFileIdFromURL();
+
+    if (!fileId) {
+      alert("Missing fileId in URL. Example: ?fileId=?");
+      throw new Error("fileId not found in URL");
+    }
+
+    const playlistUrl = `http://localhost:4000/api/storage/${fileId}/playlist`;
+
+    let hls;
+    let objectUrl;
+
+    function loadPlaylistAndUpdate() {
+      fetch(playlistUrl)
+        .then(response => response.text())
+        .then(m3u8Text => {
+          if (objectUrl) {
+            URL.revokeObjectURL(objectUrl);
+          }
+
+          const blob = new Blob([m3u8Text], { type: "application/vnd.apple.mpegurl" });
+          objectUrl = URL.createObjectURL(blob);
+
+          if (!hls) {
+            const hls = new Hls({
+            // Buffer Configuration - tối ưu cho segment 10s
+            maxBufferLength: 30,           // 3 segments = 30s buffer
+            maxMaxBufferLength: 40,        // 4 segments = 40s buffer tối đa
+            maxBufferSize: 50 * 1000 * 1000, // 50MB (giảm từ 60MB)
+            
+            // Forward Buffer - quan trọng cho progressive loading
+            maxBufferHole: 0.5,            // Fill holes > 0.5s trong buffer
+            
+            // Fragment Loading - tối ưu cho segment 10s
+            fragLoadingTimeOut: 20000,     // 20s timeout (2x segment duration)
+            fragLoadingMaxRetry: 3,        // 3 lần thử lại (giảm từ 5)
+            fragLoadingRetryDelay: 1000,   // 1s delay giữa các lần retry
+            
+            // Performance
+            enableWorker: true,            // Web Worker cho performance
+            lowLatencyMode: false,         // Tắt low latency cho progressive
+            
+            // Streaming behavior
+            startLevel: -1,                // Auto-select quality ban đầu
+            startFragPrefetch: true,       // Prefetch fragment đầu tiên
+            testBandwidth: false,          // Không test bandwidth
+            
+            // Error handling
+            manifestLoadingTimeOut: 10000, // 10s timeout cho manifest
+            manifestLoadingMaxRetry: 3,    // 3 lần thử lại manifest
+            
+            // Tắt live streaming features
+            liveSyncDuration: 3,           // Giảm xuống 3 (không quan trọng cho VOD)
+            liveMaxLatencyDuration: 5,     // Giảm xuống 5 (không quan trọng cho VOD)
+            
+            // Debug (có thể tắt trong production)
+            debug: false
+          });
+            hls.loadSource(objectUrl);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.ERROR, (event, data) => {
+              console.error("HLS.js error:", data);
+            });
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+              console.log("Initial manifest loaded.");
+              video.currentTime = 0;
+            });
+          } else {
+            hls.loadSource(objectUrl);
+            console.log("Reloaded HLS manifest.");
+          }
+        })
+        .catch(error => {
+          console.error("Fetch playlist failed:", error);
+        });
+    }
+
+    // Load lần đầu
+    loadPlaylistAndUpdate();
+  </script>
+</body>
+</html>
