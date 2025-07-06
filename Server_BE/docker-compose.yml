@@ -1,17 +1,17 @@
 services:
-  # BE spliter
-  be_spliter_container:
+  # BE HLS
+  hls_demo_container:
     build:
       context: .
       dockerfile: Dockerfile
     
     # named image
-    image: nguyennt63/be_spliter:latest
+    image: nguyennt63/HLS_demo:latest
     # named container
-    container_name: be_spliter_container
+    container_name: HLS_demo_container
     # ports of container
     ports:
-      - "3000:3000"
+      - "4000:4000"
     # select env
     # env_file:
     # 

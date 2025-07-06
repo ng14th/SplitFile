@@ -39,7 +39,7 @@ WORKDIR /app/src
 # Healthcheck
 # HEALTHCHECK --interval=15s --timeout=3s --retries=5 CMD curl --fail http://localhost:5000/health/ || exit 1
 
-EXPOSE 3000
+EXPOSE 4000
 
 # Start the app using Makefile target
 ENTRYPOINT ["make"]
