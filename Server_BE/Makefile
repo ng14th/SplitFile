@@ -1,4 +1,7 @@
 run-server:
+	uv run aerich upgrade
+	uv run aerich migrations
+	uv run aerich upgrade
 	uv run python3 run_app.py
 
 init_db:

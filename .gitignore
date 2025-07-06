@@ -1,2 +1,5 @@
 Server_BE/.venv
 Server_BE/envs/.env
+**/__pycache__/
+__pycache__/
+**/*.py[cod]
